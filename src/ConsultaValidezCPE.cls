@@ -68,4 +68,7 @@ End Function
 
 Private Function UsuarioNoExiste(Respuesta As String) As Boolean
     UsuarioNoExiste = InStr(1, Respuesta, "El Usuario ingresado no existe")
+    If UsuarioNoExiste = False Then
+        UsuarioNoExiste = InStr(1, Respuesta, "El encabezado de seguridad es incorrecto")
+    End If
 End Function
