@@ -4,4 +4,4 @@
 - [Descargar archivo excel](https://raw.githubusercontent.com/vba-dev/ConsultaCPE/master/ConsultaCPE.xlsm).
 - [Reportar errores o sugerir mejoras](https://github.com/vba-dev/ConsultaCPE/issues).
 
-[imagen](https://raw.githubusercontent.com/vba-dev/ConsultaCPE/master/img.png)
+![imagen](https://raw.githubusercontent.com/vba-dev/ConsultaCPE/master/img.png)
