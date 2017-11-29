@@ -2,24 +2,36 @@ VERSION 1.0 CLASS
 BEGIN
   MultiUse = -1  'True
 END
-Attribute VB_Name = "ConsultaValidezCPE"
+Attribute VB_Name = "ConsultaCPE"
 Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
+''
+' ConsultaCPE v1.0.0
+' (c) Victor Zevallos - https://github.com/vba-dev/ConsultaCPE
+'
+' Library used: Microsoft XML v6.0
+'
+' @author victorzevallos@protonmail.com
+' @license MIT (http://www.opensource.org/licenses/mit-license.php)
+'' ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ '
+
 Option Explicit
 
 Const Url As String = "https://www.sunat.gob.pe/ol-it-wsconscpegem/billConsultService"
+
 Private XmlSol As String
+
 Private XmlComprobante As String
 
 Public Sub Sol(Ruc As String, Usuario As String, Clave As String)
     XmlSol = "<wsse:Security>" & _
-                "<wsse:UsernameToken>" & _
-                "<wsse:Username>" & Ruc & Usuario & "</wsse:Username>" & _
-                "<wsse:Password>" & Clave & "</wsse:Password>" & _
-                "</wsse:UsernameToken>" & _
-            "</wsse:Security>"
+                 "<wsse:UsernameToken>" & _
+                 "<wsse:Username>" & Ruc & Usuario & "</wsse:Username>" & _
+                 "<wsse:Password>" & Clave & "</wsse:Password>" & _
+                 "</wsse:UsernameToken>" & _
+             "</wsse:Security>"
             
 End Sub
 
@@ -39,17 +51,17 @@ Public Function Enviar() As String
 
     XmlHttp.Open "POST", Url, False
     XmlHttp.Send Xml()
-    
+
     XmlDoc.LoadXML XmlHttp.responseText
     Respuesta = XmlDoc.Text
 
     Set XmlHttp = Nothing
     Set XmlDoc = Nothing
-    
+
     If UsuarioNoExiste(Respuesta) Then
-        Err.Raise 65535, , "Verifique el nombre del usuario y que la clave sea correcta"
+        Err.Raise 65535, , "Verifique el nombre del usuario y que la clave sea correcta."
     End If
-    
+
     Enviar = Right(Respuesta, Len(Respuesta) - 4)
 End Function
 

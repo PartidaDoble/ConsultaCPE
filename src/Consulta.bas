@@ -1,9 +1,9 @@
-Attribute VB_Name = "Consultas"
+Attribute VB_Name = "Consulta"
 Option Explicit
 
 Sub ConsultaIndividual()
     On Error GoTo TratarErrores
-    Dim Consulta As New ConsultaValidezCPE
+    Dim Consulta As New ConsultaCPE
 
     Consulta.Sol [Ruc], [Usuario], [Clave]
     Consulta.Comprobante [RucProveedor], [Tipo], [Serie], [Numero]
@@ -20,7 +20,7 @@ End Sub
 
 Sub ConsultaMasiva()
     On Error GoTo TratarErrores
-    Dim Consulta As New ConsultaValidezCPE
+    Dim Consulta As New ConsultaCPE
     Dim f As Integer
     Dim Ultimafila As Integer
 
