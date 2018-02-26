@@ -8,7 +8,7 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = False
 Attribute VB_Exposed = False
 ''
-' ConsultaCPE v1.0.0
+' ConsultaCPE v1.0.1
 ' (c) Victor Zevallos - https://github.com/vba-dev/ConsultaCPE
 '
 ' Library used: Microsoft XML v6.0
@@ -25,6 +25,8 @@ Private XmlSol As String
 
 Private XmlComprobante As String
 
+Private XmlDoc As New MSXML2.DOMDocument60
+
 Public Sub Sol(Ruc As String, Usuario As String, Clave As String)
     XmlSol = "<wsse:Security>" & _
                  "<wsse:UsernameToken>" & _
@@ -32,7 +34,6 @@ Public Sub Sol(Ruc As String, Usuario As String, Clave As String)
                  "<wsse:Password>" & Clave & "</wsse:Password>" & _
                  "</wsse:UsernameToken>" & _
              "</wsse:Security>"
-            
 End Sub
 
 Public Sub Comprobante(Ruc As String, Tipo As String, Serie As String, Numero As String)
@@ -46,23 +47,17 @@ End Sub
 
 Public Function Enviar() As String
     Dim XmlHttp As New MSXML2.XMLHTTP60
-    Dim XmlDoc As New MSXML2.DOMDocument60
-    Dim Respuesta As String
-
+    
     XmlHttp.Open "POST", Url, False
     XmlHttp.Send Xml()
 
     XmlDoc.LoadXML XmlHttp.responseText
-    Respuesta = XmlDoc.Text
-
-    Set XmlHttp = Nothing
-    Set XmlDoc = Nothing
-
-    If UsuarioNoExiste(Respuesta) Then
+    
+    If ErrorAutenticacion() Then
         Err.Raise 65535, , "Verifique el nombre del usuario y que la clave sea correcta."
     End If
 
-    Enviar = Right(Respuesta, Len(Respuesta) - 4)
+    Enviar = XmlDoc.SelectSingleNode("//statusMessage").Text
 End Function
 
 Private Function Xml() As String
@@ -78,9 +73,15 @@ Private Function Xml() As String
           "</soapenv:Envelope>"
 End Function
 
-Private Function UsuarioNoExiste(Respuesta As String) As Boolean
-    UsuarioNoExiste = InStr(1, Respuesta, "El Usuario ingresado no existe")
-    If UsuarioNoExiste = False Then
-        UsuarioNoExiste = InStr(1, Respuesta, "El encabezado de seguridad es incorrecto")
+Private Function ErrorAutenticacion() As Boolean
+    On Error GoTo TratarErrores
+
+    If Not IsEmpty(XmlDoc.SelectSingleNode("//faultcode").Text) Then
+        ErrorAutenticacion = True
     End If
+    
+TratarErrores:
+    If Err.Number = 91 Then ErrorAutenticacion = False
 End Function
+
+
