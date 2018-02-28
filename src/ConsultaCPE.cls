@@ -78,6 +78,7 @@ Private Function ErrorAutenticacion() As Boolean
 
     If Not IsEmpty(XmlDoc.SelectSingleNode("//faultcode").Text) Then
         ErrorAutenticacion = True
+        Exit Function
     End If
     
 TratarErrores:
