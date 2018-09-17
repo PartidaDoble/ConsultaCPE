@@ -7,3 +7,21 @@
 - [Reportar errores o sugerir mejoras](https://github.com/vba-dev/ConsultaCPE/issues).
 
 ![imagen](https://raw.githubusercontent.com/vba-dev/ConsultaCPE/master/img.png)
+
+# Ejemplo de consulta masiva
+
+## Paso 1
+Ingrese su clave SOL.
+![sol](https://raw.githubusercontent.com/vba-dev/ConsultaCPE/master/clavesol.png)
+
+## Paso 2
+Limpie la tabla.
+![clean](https://raw.githubusercontent.com/vba-dev/ConsultaCPE/master/dataclean.png)
+
+## Paso 3
+Ingrese los comprobantes que desea consultar.
+![data](https://raw.githubusercontent.com/vba-dev/ConsultaCPE/master/datainput.png)
+
+## Paso 4
+Haga click en el botón consultar.
+![result](https://raw.githubusercontent.com/vba-dev/ConsultaCPE/master/img.png)
