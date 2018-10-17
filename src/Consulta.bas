@@ -49,3 +49,7 @@ TratarErrores:
     End If
 End Sub
 
+Sub LimpiarTabla()
+    Rows(3).ClearContents
+    Range("B4").CurrentRegion.Offset(1, 0).ClearContents
+End Sub
