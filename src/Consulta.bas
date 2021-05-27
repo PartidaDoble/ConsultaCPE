@@ -1,55 +1,104 @@
 Attribute VB_Name = "Consulta"
 Option Explicit
 
-Sub ConsultaIndividual()
-    On Error GoTo TratarErrores
-    Dim Consulta As New ConsultaCPE
+Private Type CredentialType
+    Ruc As String
+    Username As String
+    Password As String
+End Type
 
-    Consulta.Sol [Ruc], [Usuario], [Clave]
-    Consulta.Comprobante [RucProveedor], [Tipo], [Serie], [Numero]
-    [Respuesta] = Consulta.Enviar()
+Private Type DocumentType
+    Ruc As String
+    TypeDoc As String
+    Serie As String
+    Number As String
+End Type
+
+Public Sub Consult()
+    On Error GoTo HandleErrors
+    Dim Credential As CredentialType
+    Dim Document As DocumentType
+    Dim LastRow As Integer
+    Dim Row As Integer
     
-    Exit Sub
-TratarErrores:
-    If Err.Number = 65535 Then
-        MsgBox Err.Description, vbCritical, "ERROR SOL"
-        Hoja1.Activate
-    ElseIf Err.Number < 0 Then
-        MsgBox "Verifique su conexión a internet.", vbCritical, "ERROR"
-    End If
-End Sub
-
-Sub ConsultaMasiva()
-    On Error GoTo TratarErrores
-    Dim Consulta As New ConsultaCPE
-    Dim f As Integer
-    Dim Ultimafila As Integer
-
-    Ultimafila = Hoja3.Cells(Rows.Count, 2).End(xlUp).Row
-
-    Consulta.Sol [Ruc], [Usuario], [Clave]
+    Credential.Ruc = SheetSol.Range("D5")
+    Credential.Username = SheetSol.Range("D7")
+    Credential.Password = SheetSol.Range("D9")
     
     Application.ScreenUpdating = False
     
-    For f = 5 To Ultimafila
-        With Hoja3
-            Consulta.Comprobante .Cells(f, 2), .Cells(f, 3), .Cells(f, 4), .Cells(f, 5)
-            .Cells(f, 6) = Consulta.Enviar()
-        End With
-    Next f
+    LastRow = SheetDocs.Cells(Rows.Count, 2).End(xlUp).Row
+    For Row = 5 To LastRow
+        Document.Ruc = SheetDocs.Cells(Row, 2)
+        Document.TypeDoc = SheetDocs.Cells(Row, 3)
+        Document.Serie = SheetDocs.Cells(Row, 4)
+        Document.Number = SheetDocs.Cells(Row, 5)
+        
+        SheetDocs.Cells(Row, 6) = SendRequest(BuildXmlSoap(Credential, Document))
+    Next Row
     
     Application.ScreenUpdating = True
     Exit Sub
-TratarErrores:
+
+HandleErrors:
     If Err.Number = 65535 Then
-        MsgBox Err.Description, vbCritical, "ERROR SOL"
-        Hoja1.Activate
-    ElseIf Err.Number < 0 Then
-        MsgBox "Verifique su conexión a internet.", vbCritical, "ERROR"
+        MsgBox Err.Description, vbCritical, "Error SOL"
+        SheetSol.Activate
+    Else
+        MsgBox Err.Description, vbCritical
     End If
 End Sub
 
-Sub LimpiarTabla()
+Private Function SendRequest(XmlSoap As String) As String
+    On Error GoTo HandleErrors
+    Dim ClientHttp As New MSXML2.XMLHTTP60
+    Dim XmlResponse As New MSXML2.DOMDocument60
+    Const Endpoint As String = "https://ww1.sunat.gob.pe/ol-it-wsconscpegem/billConsultService"
+    
+    ClientHttp.Open "POST", Endpoint, False
+    ClientHttp.send XmlSoap
+    XmlResponse.LoadXML ClientHttp.responseText
+
+    SendRequest = XmlResponse.SelectSingleNode("//statusMessage").Text
+    Exit Function
+
+HandleErrors:
+    If Err.Number = 91 Then
+        If XmlResponse.SelectSingleNode("//faultcode").Text = "ns0:0103" Then
+            Err.Raise 65535, , "El número de RUC o el nombre de usuario son incorrectos."
+        Else
+            Err.Raise 65535, , XmlResponse.SelectSingleNode("//faultstring").Text
+        End If
+    Else
+        Err.Raise 65534, , "Verifique su conexión a internet."
+    End If
+End Function
+
+Private Function BuildXmlSoap(Credential As CredentialType, Document As DocumentType) As String
+    BuildXmlSoap = _
+        "<soapenv:Envelope xmlns:ser=""http://service.sunat.gob.pe"" " & _
+                          "xmlns:soapenv=""http://schemas.xmlsoap.org/soap/envelope/"" " & _
+                          "xmlns:wsse=""http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd""> " & _
+            "<soapenv:Header>" & _
+                "<wsse:Security>" & _
+                    "<wsse:UsernameToken>" & _
+                    "<wsse:Username>" & Credential.Ruc & Credential.Username & "</wsse:Username>" & _
+                    "<wsse:Password>" & Credential.Password & "</wsse:Password>" & _
+                    "</wsse:UsernameToken>" & _
+                "</wsse:Security>" & _
+            "</soapenv:Header>" & _
+            "<soapenv:Body>" & _
+                "<ser:getStatus>" & _
+                    "<rucComprobante>" & Document.Ruc & "</rucComprobante>" & _
+                    "<tipoComprobante>" & Format(Document.TypeDoc, "00") & "</tipoComprobante>" & _
+                    "<serieComprobante>" & Document.Serie & "</serieComprobante>" & _
+                    "<numeroComprobante>" & Document.Number & "</numeroComprobante>" & _
+                "</ser:getStatus>" & _
+            "</soapenv:Body>" & _
+        "</soapenv:Envelope>"
+End Function
+
+Public Sub CleanTable()
     Rows(3).ClearContents
     Range("B4").CurrentRegion.Offset(1, 0).ClearContents
 End Sub
