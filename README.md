@@ -1,6 +1,6 @@
 # Consulta de comprobantes de pago electrónicos - Perú
 
-Descargar macro [ConsultaCPE-v1.2.1.xlsm](https://raw.githubusercontent.com/PartidaDoble/ConsultaCPE/master/ConsultaCPE-1.2.1.xlsm)
+Descargar macro [ConsultaCPE-v1.2.1.xlsm](https://raw.githubusercontent.com/PartidaDoble/ConsultaCPE/master/ConsultaCPE-v1.2.1.xlsm)
 
 ## Descripción
 
